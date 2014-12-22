@@ -23,31 +23,14 @@
 #---------------------------------------------------------#
 
 
-if [ 1 -eq 0 ]; then        # This is never true, thus it acts as block comments ;)
-### One liner - Grab the latest version and execute! #####################################
-wget -qO- https://raw.github.com/g0tmi1k/os-scripts/master/kali.sh | bash
-#curl -s -L -k https://raw.github.com/g0tmi1k/kali-postinstall/master/kali_postinstall.sh | nohup bash
-###########################################################################################
-fi
-
-
 ##### Location information
-keyboardlayout="gb"         # Great Britain
-keyboardApple=false         # Using a Apple/Macintosh keyboard? (anything other than 'false' will enable)
-timezone="Europe/London"    # London, Europe
+keyboardlayout="en"         # English
+keyboardApple=true          # Using a Apple/Macintosh keyboard? (anything other than 'false' will enable)
+timezone="US/Eastern"       # US, Eastern
 
 
 ##### (Optional) Enable debug mode
 #set -x
-
-
-if [ 1 -eq 0 ]; then        # This is never true, thus it acts as block comments ;)
-##### (Optional) Remote connection via SSH
-services ssh start          # Start SSH to allow for remote connection to Kali
-ifconfig eth0               # Get the IP of the network interface to SSH into (guessing the interface is eth0)
-#--- Use the local computer (non Kali) from here on out via SSH (You may wish to copy/paste selected commands into prompt. Tip: Do only a few lines at once)
-ssh root@*ip*               # Replace '*ip*' with the value from before (ifconfig)
-fi
 
 
 ##### Check if we are running as root - else this script will fail (hard!)
@@ -150,7 +133,7 @@ fi
 
 
 ##### Checking to see if there is a second ethernet card (if so, set an static IP address)
-ifconfig eth1 &>/devnull
+ifconfig eth1 &>/dev/null
 if [[ $? == 0 ]]; then
   ##### Setting a static IP address (192.168.155.175/24) on eth1
   echo -e "\n\e[01;32m[+]\e[00m Setting a static IP address (192.168.155.175/24) on eth1"
@@ -160,9 +143,9 @@ if [[ $? == 0 ]]; then
 
 auto eth1
 iface eth1 inet static
-    address 192.168.155.175
+    address 192.168.56.175
     netmask 255.255.255.0
-    gateway 192.168.155.1
+    gateway 192.168.56.1
 EOF
 fi
 
@@ -182,24 +165,22 @@ chattr +i $file 2>/dev/null
 
 
 ##### Updating hostname (to 'kali') - but not domain name
-#echo -e "\n\e[01;32m[+]\e[00m Updating hostname (to 'kali')"
-#hostname="kali"
-##--- Change it now
-#hostname "$hostname"
-##--- Make sure it sticks after reboot
-#file=/etc/hostname; [ -e $file ] && cp -n $file{,.bkup}
-#echo "$(hostname)" > $file
-##--- Set host file
-#file=/etc/hosts; [ -e $file ] && cp -n $file{,.bkup}
-#sed -i 's/127.0.1.1.*/127.0.1.1  '$hostname'/' $file    #echo -e "127.0.0.1  localhost.localdomain localhost\n127.0.0.1  $hostname.$domainname $hostname" > $file    #$(hostname) $domainname
-##--- Check
-##hostname; hostname -f
+#echo -e "\n\e[01;32m[+]\e[00m Updating hostname (to 'shadow')"
+hostname="shadow"
+#--- Change it now
+hostname "$hostname"
+#--- Make sure it sticks after reboot
+file=/etc/hostname; [ -e $file ] && cp -n $file{,.bkup}
+echo "$(hostname)" > $file
+#--- Set host file
+file=/etc/hosts; [ -e $file ] && cp -n $file{,.bkup}
+sed -i 's/127.0.1.1.*/127.0.1.1  '$hostname'/' $file    #echo -e "127.0.0.1  localhost.localdomain localhost\n127.0.0.1  $hostname.$domainname $hostname" > $file    #$(hostname) $domainname
+#--- Check
+hostname; hostname -f
 
 
 ##### Updating location information (keyboard layout & time zone) - set either value to "" to skip.
 echo -e "\n\e[01;32m[+]\e[00m Updating location information (keyboard layout & time zone) - $keyboardlayout & $timezone"
-#keyboardlayout="gb"         # Great Britain
-#timezone="Europe/London"    # London, Europe
 #--- Configure keyboard layout
 if [ ! -z "$keyboardlayout" ]; then
   file=/etc/default/keyboard; #[ -e $file ] && cp -n $file{,.bkup}
@@ -1237,42 +1218,23 @@ screen -t bash2 1
 select 0
 EOF
 
+##### Setting up git dir, and VIM config
+mkdir ~/git
+cd ~/git
+git clone https://github.com/cquick97/vim.git
+~/git/vim/install.sh
+~/.vim/update.sh
+cd ~
 
-##### Configuring vim - all users
-echo -e "\n\e[01;32m[+]\e[00m Configuring vim ~ CLI text editor"
-apt-get -y -qq install vim
-#--- Configure vim
-file=/etc/vim/vimrc; [ -e $file ] && cp -n $file{,.bkup}   #/root/.vimrc
-sed -i 's/.*syntax on/syntax on/' $file
-sed -i 's/.*set background=dark/set background=dark/' $file
-sed -i 's/.*set showcmd/set showcmd/' $file
-sed -i 's/.*set showmatch/set showmatch/' $file
-sed -i 's/.*set ignorecase/set ignorecase/' $file
-sed -i 's/.*set smartcase/set smartcase/' $file
-sed -i 's/.*set incsearch/set incsearch/' $file
-sed -i 's/.*set autowrite/set autowrite/' $file
-sed -i 's/.*set hidden/set hidden/' $file
-sed -i 's/.*set mouse=.*/"set mouse=a/' $file
-grep -q '^set number' $file 2>/dev/null || echo 'set number' >> $file                                                                        # Add line numbers
-grep -q '^set autoindent' $file 2>/dev/null || echo 'set autoindent' >> $file                                                                # Set auto indent
-grep -q '^set expandtab' $file 2>/dev/null || echo -e 'set expandtab\nset smarttab' >> $file                                                 # Set use spaces instead of tabs
-grep -q '^set softtabstop' $file 2>/dev/null || echo -e 'set softtabstop=4\nset shiftwidth=4' >> $file                                       # Set 4 spaces as a 'tab'
-grep -q '^set foldmethod=marker' $file 2>/dev/null || echo 'set foldmethod=marker' >> $file                                                  # Folding
-grep -q '^nnoremap <space> za' $file 2>/dev/null || echo 'nnoremap <space> za' >> $file                                                      # Space toggle folds
-grep -q '^set hlsearch' $file 2>/dev/null || echo 'set hlsearch' >> $file                                                                    # Highlight search results
-grep -q '^set laststatus' $file 2>/dev/null || echo -e 'set laststatus=2\nset statusline=%F%m%r%h%w\ (%{&ff}){%Y}\ [%l,%v][%p%%]' >> $file   # Status bar
-grep -q '^filetype on' $file 2>/dev/null || echo -e 'filetype on\nfiletype plugin on\nsyntax enable\nset grepprg=grep\ -nH\ $*' >> $file     # Syntax highlighting
-grep -q '^set wildmenu' $file 2>/dev/null || echo -e 'set wildmenu\nset wildmode=list:longest,full' >> $file                                 # Tab completion
-grep -q '^set pastetoggle=<F9>' $file 2>/dev/null || echo -e 'set pastetoggle=<F9>' >> $file                                                 # Hotkey - turning off auto indent when pasting
-#--- Set as default editor
-export EDITOR="vim"   #update-alternatives --config editor
-file=/etc/bash.bashrc; [ -e $file ] && cp -n $file{,.bkup}
-grep -q '^EDITOR' $file 2>/dev/null || echo 'EDITOR="vim"' >> $file
-git config --global core.editor "vim"
-#--- Set as default mergetool
-git config --global merge.tool vimdiff
-git config --global merge.conflictstyle diff3
-git config --global mergetool.prompt false
+##### Installing ~/tools
+# onetwopunch
+# checksec.sh
+# ...etc
+mkdir ~/tools
+mkdir ~/tools/checksec
+wget http://www.trapkit.de/tools/checksec.sh > ~/tools/checksec/checksec.sh
+cd ~/tools
+git clone https://github.com/superkojiman/onetwopunch
 
 
 ##### Setting up iceweasel
@@ -1633,8 +1595,8 @@ apt-get -y -qq install gtk-recordmydesktop
 
 
 ##### Installing gimp
-#echo -e "\n\e[01;32m[+]\e[00m Installing gimp ~ GUI image editing"
-#apt-get -y -qq install gimp
+echo -e "\n\e[01;32m[+]\e[00m Installing gimp ~ GUI image editing"
+apt-get -y -qq install gimp
 
 
 ##### Installing shutter
@@ -1825,6 +1787,7 @@ git clone git://github.com/chokepoint/azazel.git /usr/share/azazel/
 echo -e "\n\e[01;32m[+]\e[00m Installing b374k ~ (PHP) web shell"
 apt-get -y -qq install git
 git clone git://github.com/b374k/b374k.git /usr/share/b374k/
+ln -s /usr/share/b374k ~/tools/b374k
 
 
 ##### Installing jsp file browser
@@ -1990,13 +1953,13 @@ echo -e "\n\e[01;32m[+]\e[00m Updating wordlists ~ collection of wordlists"
 gzip -dc < /usr/share/wordlists/rockyou.txt.gz > /usr/share/wordlists/rockyou.txt   #gunzip rockyou.txt.gz
 #rm -f /usr/share/wordlists/rockyou.txt.gz
 #--- Extract sqlmap wordlist
-#unzip -o -d /usr/share/sqlmap/txt/ /usr/share/sqlmap/txt/wordlist.zip
+unzip -o -d /usr/share/sqlmap/txt/ /usr/share/sqlmap/txt/wordlist.zip
 #--- Add 10,000 Top/Worst/Common Passwords
 wget -q "http://xato.net/files/10k most common.zip" -O /tmp/10kcommon.zip && unzip -q -o -d /usr/share/wordlists/ /tmp/10kcommon.zip && mv -f /usr/share/wordlists/10k{\ most\ ,_most_}common.txt; rm -f /tmp/10kcommon.zip
 #--- Linking to more - folders
-#ln -sf /usr/share/dirb/wordlists /usr/share/wordlists/dirb
+ln -sf /usr/share/dirb/wordlists /usr/share/wordlists/dirb
 #--- Linking to more - files
-#ln -sf /usr/share/sqlmap/txt/wordlist.txt /usr/share/wordlists/sqlmap.txt
+ln -sf /usr/share/sqlmap/txt/wordlist.txt /usr/share/wordlists/sqlmap.txt
 ##--- Not enough? Want more? Check below!
 ##apt-cache search wordlist
 ##find / \( -iname '*wordlist*' -or -iname '*passwords*' \) #-exec ls -l {} \;
@@ -2055,6 +2018,58 @@ ssh-keygen -b 4096 -t rsa -f /root/.ssh/id_rsa -P ""
 #--- Enable ssh at startup
 #update-rc.d -f ssh defaults
 
+
+##### Setting up .gitconfig
+cat <<EOF >> ~/.gitconfig
+
+[user]
+    email = cquick197@gmail.com
+    name = Connor Quick
+
+[core]
+    eol = LF
+    editor = vim
+    autocrlf = input
+
+[color]
+   diff = auto
+   status = auto
+   branch = auto
+   interactive = auto
+   ui = true
+   pager = true
+
+[color "branch"]
+   current = yellow reverse
+   local = yellow
+   remote = green
+
+[color "diff"]
+   meta = yellow bold
+   frag = magenta bold
+   old = red bold
+   new = green bold
+
+[color "status"]
+   added = yellow
+   changed = green
+   untracked = cyan
+
+[alias]
+   co = checkout
+   st = status -sb
+   ct = commit
+   w = whatchanged
+   au = add -u
+   cln = clean -n
+   lg = log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+   track = "!f() { ([ $# -eq 2 ] && ( echo \"Setting tracking for branch \" $1 \" -> \" $2;git branch --set-upstream $1 $2; ) || ( echo --Branches-- && git for-each-ref --format=\"%(refname:short) -> %(upstream:short)\" refs/heads && echo --Remotes-- && git remote -v)); }; f"
+   undo = reset --hard
+   changes = diff --name-status -r
+   diffstat = diff --stat -r
+   new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+   pull = pull --rebase
+EOF
 
 ##### Cleaning the system
 echo -e "\n\e[01;32m[+]\e[00m Cleaning the system"
