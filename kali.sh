@@ -1011,6 +1011,7 @@ grep -q '^## strings' $file 2>/dev/null || echo -e '## strings\nalias strings="s
 grep -q '^## nmap' $file 2>/dev/null || echo -e '## nmap\nalias nmap="nmap --reason"\n\n' >> $file
 grep -q '^## aircrack-ng' $file 2>/dev/null || echo -e '## aircrack-ng\nalias aircrack-ng="aircrack-ng -z"\n\n' >> $file
 grep -q '^## metasploit' $file 2>/dev/null || echo -e '## metasploit\nalias msfc="service postgresql start; service metasploit start; msfconsole -q"\n\n' >> $file
+grep -q '^## tools' $file 2>/dev/null || echo -e '## tools\nalias checksec="/root/tools/checksec/checksec.sh"\nalias onetwopunch="/root/tools/onetwopunch.sh"\n' >> $file
 #airmon-vz --verbose
 #--- Apply new aliases
 [ $SHELL == "/bin/zsh" ] && source ~/.zshrc || source $file
@@ -1034,6 +1035,7 @@ cat <<EOF > $file
     copy_on_selection = True
     background_type = transparent
     scrollback_infinite = True
+    show_titlebar = False
 [layouts]
   [[default]]
     [[[child1]]]
@@ -1221,22 +1223,21 @@ EOF
 ##### Setting up git dir, and VIM config
 echo -e "\n\e[01;32m[+]\e[00m Configuring vim ~ CLI text editor"
 apt-get -y -qq install vim
-mkdir ~/git
-cd ~/git
-git clone https://github.com/cquick97/vim.git
-~/git/vim/install.sh
-~/.vim/update.sh
-cd ~
+mkdir -p /root/git/vim
+git clone https://github.com/cquick97/vim.git /root/git/vim
+/root/git/vim/install.sh
+/root/.vim/update.sh
 
 ##### Installing ~/tools
 # onetwopunch
 # checksec.sh
 # ...etc
-mkdir ~/tools
-mkdir ~/tools/checksec
-wget http://www.trapkit.de/tools/checksec.sh > ~/tools/checksec/checksec.sh
-cd ~/tools
-git clone https://github.com/superkojiman/onetwopunch
+echo -e "\n\e[01;32m[+]\e[00m Downloading checksec and onetwopunch"
+mkdir -p /root/tools/checksec
+wget http://www.trapkit.de/tools/checksec.sh -O /root/tools/checksec/checksec.sh
+mkdir -p /root/tools/onetwopunch
+git clone https://github.com/superkojiman/onetwopunch /root/tools/onetwopunch
+chmod +x /root/tools/{checksec/checksec.sh,onetwopunch/onetwopunch.sh}
 
 
 ##### Setting up iceweasel
