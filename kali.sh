@@ -268,9 +268,9 @@ update-grub
 #apt-get -y -qq install chkconfig
 #chkconfig gdm3 off                                 # ...or: mv -f /etc/rc2.d/S19gdm3 /etc/rc2.d/K17gdm           #file=/etc/X11/default-display-manager; [ -e $file ] && cp -n $file{,.bkup}   #echo /bin/true > $file
 #--- Enable auto (gui) login
-#file=/etc/gdm3/daemon.conf; [ -e $file ] && cp -n $file{,.bkup}
-#sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' $file
-#sed -i 's/^.*AutomaticLogin = .*/AutomaticLogin = root/' $file
+file=/etc/gdm3/daemon.conf; [ -e $file ] && cp -n $file{,.bkup}
+sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' $file
+sed -i 's/^.*AutomaticLogin = .*/AutomaticLogin = root/' $file
 #--- Shortcut for when you want to start GUI
 #ln -sf /usr/sbin/gdm3 /usr/bin/startx
 
@@ -1219,6 +1219,8 @@ select 0
 EOF
 
 ##### Setting up git dir, and VIM config
+echo -e "\n\e[01;32m[+]\e[00m Configuring vim ~ CLI text editor"
+apt-get -y -qq install vim
 mkdir ~/git
 cd ~/git
 git clone https://github.com/cquick97/vim.git
