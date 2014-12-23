@@ -196,8 +196,8 @@ hostname; hostname -f
 
 ##### Updating location information (keyboard layout & time zone) - set either value to "" to skip.
 echo -e "\n\e[01;32m[+]\e[00m Updating location information (keyboard layout & time zone) - $keyboardlayout & $timezone"
-#keyboardlayout="gb"         # Great Britain
-#timezone="Europe/London"    # London, Europe
+#keyboardlayout="us"        # United States
+#timezone="US/Eastern"      # EST
 #--- Configure keyboard layout
 if [ ! -z "$keyboardlayout" ]; then
   file=/etc/default/keyboard; #[ -e $file ] && cp -n $file{,.bkup}
@@ -285,9 +285,9 @@ update-grub
 #apt-get -y -qq install chkconfig
 #chkconfig gdm3 off                                 # ...or: mv -f /etc/rc2.d/S19gdm3 /etc/rc2.d/K17gdm           #file=/etc/X11/default-display-manager; [ -e $file ] && cp -n $file{,.bkup}   #echo /bin/true > $file
 #--- Enable auto (gui) login
-#file=/etc/gdm3/daemon.conf; [ -e $file ] && cp -n $file{,.bkup}
-#sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' $file
-#sed -i 's/^.*AutomaticLogin = .*/AutomaticLogin = root/' $file
+file=/etc/gdm3/daemon.conf; [ -e $file ] && cp -n $file{,.bkup}
+sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' $file
+sed -i 's/^.*AutomaticLogin = .*/AutomaticLogin = root/' $file
 #--- Shortcut for when you want to start GUI
 #ln -sf /usr/sbin/gdm3 /usr/bin/startx
 
@@ -1249,17 +1249,6 @@ mkdir -p /root/git/vim
 git clone https://github.com/cquick97/vim.git /root/git/vim
 /root/git/vim/install.sh
 /root/.vim/update.sh
-
-##### Installing ~/tools
-# onetwopunch
-# checksec.sh
-# ...etc
-echo -e "\n\e[01;32m[+]\e[00m Downloading checksec and onetwopunch"
-mkdir -p /root/tools/checksec
-wget http://www.trapkit.de/tools/checksec.sh -O /root/tools/checksec/checksec.sh
-mkdir -p /root/tools/onetwopunch
-git clone https://github.com/superkojiman/onetwopunch /root/tools/onetwopunch
-chmod +x /root/tools/{checksec/checksec.sh,onetwopunch/onetwopunch.sh}
 
 
 ##### Setting up iceweasel
