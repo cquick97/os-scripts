@@ -1919,6 +1919,23 @@ EOF
 chmod +x $file
 
 
+##### Installing fmtstr
+echo -e "\n\e[01;32m[+]\e[00m Installing fmtstr ~ Format String vuln helper"
+git clone git://github.com/cquick97/fmtstr.git /usr/share/fmtstr_git/
+file=/usr/local/bin/fmtstr
+cat <<EOF > $file
+#!/bin/bash
+
+python /usr/share/fmtstr_git
+EOF
+chmod +x $file
+
+
+#### Installing asciinema
+echo -e "\n\e[01;32m[+]\e[00m Installing asciinema ~ Terminal recording software"
+curl -sL https://asciinema.org/install | sh
+
+
 ##### Installing clusterd
 echo -e "\n\e[01;32m[+]\e[00m Installing clusterd ~ clustered attack toolkit (jboss, coldfusion, weblogic, tomcat etc)"
 apt-get -y -qq install clusterd
