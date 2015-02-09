@@ -1937,11 +1937,11 @@ chmod +x $file
 ##### Installing fmtstr
 echo -e "\n\e[01;32m[+]\e[00m Installing fmtstr ~ Format String vuln helper"
 git clone git://github.com/cquick97/fmtstr.git /usr/share/fmtstr_git/
-file=/usr/local/bin/fmtstr
+file=/usr/local/bin/fmtstr_git
 cat <<EOF > $file
 #!/bin/bash
 
-python /usr/share/fmtstr_git
+python /usr/share/fmtstr_git/fmtstr.py "\$@"
 EOF
 chmod +x $file
 
